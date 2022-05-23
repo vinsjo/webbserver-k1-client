@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import InputForm from './components/InputForm';
+import TodoList from './components/TodoList';
+import { MantineProvider, Container, Title } from '@mantine/core';
 import api from './api';
 
 const App = () => {
 	const [todos, setTodos] = useState([]);
-	const [input, setInput] = useState('');
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
+	const handleSubmit = async (input) => {
 		const data = await api.POST({ text: input });
 		if (!data) return;
 		setTodos([...todos, data]);
-		setInput('');
 	};
 
 	const handleDelete = async (id) => {
@@ -45,47 +45,32 @@ const App = () => {
 	}, []);
 
 	return (
-		<div
-			style={{
-				display: 'flex',
-				flexDirection: 'column',
-				gap: '1rem',
-				justifyContent: 'center',
-				width: '100%',
-				maxWidth: '40ch',
+		<MantineProvider
+			theme={{
+				fontFamily: 'Arial, Helvetica, sans-serif',
+				spacing: { xs: 6, sm: 12, md: 18, lg: 24, xl: 32 },
+				primaryColor: 'gray',
 			}}
 		>
-			<form
-				onSubmit={handleSubmit}
-				style={{
+			<Container
+				sx={(theme) => ({
 					display: 'flex',
-					gap: '1rem',
-					justifyContent: 'space-between',
+					flexDirection: 'column',
+					gap: theme.spacing.xl,
 					width: '100%',
-				}}
+					maxWidth: '60ch',
+					minHeight: '75vh',
+				})}
 			>
-				<input
-					style={{ width: '100%' }}
-					value={input}
-					onChange={(e) => setInput(e.target.value)}
+				<Title order={1}>To-Do List</Title>
+				<InputForm onSubmit={handleSubmit} />
+				<TodoList
+					todos={todos}
+					onComplete={handleComplete}
+					onDelete={handleDelete}
 				/>
-				<button>Add</button>
-			</form>
-			<ul>
-				{todos.map(({ id, text, completed }) => (
-					<li
-						key={id}
-						style={{
-							textDecoration: completed ? 'line-through' : 'none',
-						}}
-					>
-						{text}
-						<button onClick={() => handleComplete(id)}>✓</button>
-						<button onClick={() => handleDelete(id)}>✕</button>
-					</li>
-				))}
-			</ul>
-		</div>
+			</Container>
+		</MantineProvider>
 	);
 };
 
